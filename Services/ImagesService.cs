@@ -25,6 +25,7 @@ public class ImagesService
         {
             Console.WriteLine($"Config file at {configPath} is not alligned with FileConfig class");
             Console.WriteLine("Exception message: ", e.Message);
+            _fileConfig = new FileConfig();
         }
         _protector = dataProtectionProvider.CreateProtector(_fileConfig.FileNameProtectionSeed);
     }
