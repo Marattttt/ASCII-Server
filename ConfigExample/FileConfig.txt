@@ -5,6 +5,6 @@ namespace api.Configuration;
 
 public class FileConfig
 {
-    public string OutputDirectory { get; set; }
-    public string FileNameProtectionSeed { get; set; }
+    public string OutputDirectory { get; set; }  = "";
+    public string FileNameProtectionSeed { get; set; }  = "";
 }
