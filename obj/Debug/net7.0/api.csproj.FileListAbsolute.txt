@@ -32,3 +32,8 @@
 /Users/marat/Projects/ASCII-Server/api/obj/Debug/net7.0/api.pdb
 /Users/marat/Projects/ASCII-Server/api/obj/Debug/net7.0/api.genruntimeconfig.cache
 /Users/marat/Projects/ASCII-Server/api/obj/Debug/net7.0/ref/api.dll
+/Users/marat/Projects/ASCII-Server/api/bin/Debug/net7.0/Microsoft.EntityFrameworkCore.dll
+/Users/marat/Projects/ASCII-Server/api/bin/Debug/net7.0/Microsoft.EntityFrameworkCore.Abstractions.dll
+/Users/marat/Projects/ASCII-Server/api/bin/Debug/net7.0/SixLabors.ImageSharp.dll
+/Users/marat/Projects/ASCII-Server/api/bin/Debug/net7.0/ConfigExample/FileSettings.json
+/Users/marat/Projects/ASCII-Server/api/bin/Debug/net7.0/Config/FileSettings.json
