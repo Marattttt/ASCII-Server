@@ -8,9 +8,12 @@ namespace api.Services;
 public class ImagesService
 {
     FileConfig _fileConfig;
+
+    IWebHostEnvironment _environment;
     IDataProtector _protector;
     public ImagesService(IWebHostEnvironment environment, IDataProtectionProvider dataProtectionProvider)
     {
+        _environment = environment;
 
         string configPath = Path.Combine(
             environment.ContentRootPath, 
@@ -42,7 +45,7 @@ public class ImagesService
         return true;
     }
 
-    public async Task<int> SaveFileAsync(IFormFile file)
+    public async Task<int> SaveFileAsync(IFormFile file, string sender)
     {
         if (!isFileValid(file))
             return 0;
@@ -51,12 +54,12 @@ public class ImagesService
         Console.WriteLine(_fileConfig.FileNameProtectionSeed);
 
         string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        string fileNameToProtect = file.FileName.Remove(file.FileName.LastIndexOf('.')) + sender;
 
-        string protectedFileName = _protector.Protect(
-            file.FileName.Remove(
-                file.FileName.LastIndexOf('.')));
+        string protectedFileName = _protector.Protect(fileNameToProtect);
 
         string outPath = Path.Combine(_fileConfig.OutputDirectory, protectedFileName + extension);
+        if (File.Exists(outPath))
         using (var stream = File.Create(outPath))
         {
             await file.CopyToAsync(stream);
