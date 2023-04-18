@@ -31,23 +31,10 @@ public class ImagesService
         }
         _protector = dataProtectionProvider.CreateProtector(_fileConfig.FileNameProtectionSeed);
     }
-    private bool isFileValid(IFormFile file)
-    {
-        if (file.Length <= 0)
-            return false;
-
-        string[] allowedExtensions = { ".jpg", ".png", ".jpeg" };
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
-            return false;
-
-        return true;
-    }
-
-    public async Task<int> SaveFileAsync(IFormFile file, string sender)
+    public async Task<string?> SaveFileAsync(IFormFile file, string sender)
     {
         if (!isFileValid(file))
-            return 0;
+            return null;
         
         Console.WriteLine(_fileConfig.OutputDirectory);
         Console.WriteLine(_fileConfig.FileNameProtectionSeed);
@@ -66,8 +53,19 @@ public class ImagesService
         {
             await file.CopyToAsync(stream);
         }
-        return 1;
+        return outPath;
     }
 
+    private bool isFileValid(IFormFile file)
+    {
+        if (file.Length <= 0)
+            return false;
 
+        string[] allowedExtensions = { ".jpg", ".png", ".jpeg" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
+            return false;
+
+        return true;
+    }
 }

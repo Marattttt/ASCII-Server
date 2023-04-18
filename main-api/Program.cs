@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication();
 
 builder.Services.AddScoped<ImagesService>();
+builder.Services.AddScoped<CommunicationService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

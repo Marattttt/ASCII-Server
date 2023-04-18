@@ -1,43 +1,36 @@
-using System.Security.AccessControl;
-using System.Net;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+
 using api.Services;
+using api.Models;
 
 namespace api.Controllers;
 
 [Route("[controller]/[action]")]
-public class ImagesController 
+public class ImagesController : ControllerBase
 {
     ImagesService _imagesService;
-    public ImagesController(ImagesService imagesService)
+    CommunicationService _communicationService;
+    public ImagesController(ImagesService imagesService, CommunicationService communicationService)
     {
         _imagesService = imagesService;
+        _communicationService = communicationService;
     }
-
-    [HttpGet()]
-    public string Test() 
-    {
-        return "Success!";
-    }
-
 
     [HttpPost()]
-    [Authorize()]
-    public async Task<int> Upload(IFormFile file, HttpContext context)
+    public async Task<ActionResult<string>> Upload(IFormFile file)
     {
-        try { 
-            return await _imagesService.SaveFileAsync(
-                file, 
-                context.Connection.RemoteIpAddress!.ToString());
-        }
-        catch (ArgumentNullException e) 
-        {
-            Console.WriteLine("IP adress inaccessible");
-            Console.WriteLine(e.Message);
-            return 0;
-        }
+        string? outPath = await _imagesService.SaveFileAsync(
+            file, 
+            HttpContext.Request.Host.Value);
+
+        if (outPath is null)
+            return BadRequest();
+
+        ImageToAsciiDTO dto = new ImageToAsciiDTO() {
+            Path = outPath
+        };
+        return await _communicationService.ProcessImageAsync(dto);
 
     }
 }
