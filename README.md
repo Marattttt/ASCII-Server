@@ -4,7 +4,14 @@ The project's goal is to develop a web application for accepting images, process
 
 Status: *Under development*
 
-## Preparing for use
+## Using
+
+- ### Defaults
+
+1. Main api uses ports 5000 for http and 7000 for https
+2. Processing api uses port 5001 for http
+
+#### *Both are specified in appsettings.json of each project, but the processing address is hardcoded into CommunicationService of main api, which needs changing*
 
 - ### Testing
 

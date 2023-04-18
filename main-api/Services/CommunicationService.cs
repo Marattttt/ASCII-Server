@@ -7,6 +7,7 @@ namespace api.Services;
 
 public class CommunicationService 
 {
+    //Needs changing
     string _processingUrl = "http://localhost:5001/ascii/converttotxtfile";
     public CommunicationService()
     {
