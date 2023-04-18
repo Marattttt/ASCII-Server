@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=100%, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="background-color: darkgrey;">
+  <form method="post" enctype="multipart/form-data" action="http://localhost:5215/images/upload">
+      <div>
+          <label for="file">Choose file to upload</label>
+          <input type="file" id="file" name="file" multiple />
+      </div>
+      <div>
+          <button type="submit">Submit</button> 
+      </div>
+  </form>
+
+  <hr>
+  
+  <div style="font-size: 2px; font-weight: bolder; font-family: 'Courier New', Courier, monospace;">
+    <textarea name="testtext" id="ascii-test" cols="499" rows="100000" spellcheck="false"></textarea>
+  </div>
+
+  <script>
+    async function AJAXSubmit (oFormElement) {
+      var resultElement = oFormElement.elements.namedItem("result");
+      const formData = new FormData(oFormElement);
+
+      try {
+      const response = await fetch(oFormElement.action, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        window.location.href = '/';
+      }
+
+      resultElement.value = 'Result: ' + response.status + ' ' + 
+        response.statusText;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>
