@@ -5,7 +5,7 @@ public class ProcessingService
     private const string asciiRow = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~i!lI;:,\"^`\". ";
     private const int maxPixelLightness = byte.MaxValue * 3;
 
-    public int Process(string path, 
+    public string Process(string path, 
         int width = 0,
         int height = 0,
         string? outPath = null)
@@ -16,7 +16,7 @@ public class ProcessingService
         if (File.Exists(outPath))
             File.Delete(outPath);
 
-        int result = 0;
+        string result = String.Empty;
         using (Image<Rgba32> image = Image.Load<Rgba32>(path))
         {
             bool isResizeNeeded = true;
@@ -37,7 +37,7 @@ public class ProcessingService
         return result;
     }   
 
-    private int makeAsciiTxtFile(
+    private string makeAsciiTxtFile(
         Image<Rgba32> image, 
         int width, 
         int height, 
@@ -85,7 +85,7 @@ public class ProcessingService
             }
         });
         fstream.Dispose();
-        return isSuccess ? 1 : 0;
+        return isSuccess ? outPath : String.Empty;
     }
 
     private string getDefaultOutPath(string path) 

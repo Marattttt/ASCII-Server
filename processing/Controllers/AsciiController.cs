@@ -16,9 +16,10 @@ public class AsciiController : ControllerBase
     }
 
     [HttpPost]
-    public int ConvertToTxtFile(ImageToAsciiDTO dto)
+    public string ConvertToTxtFile(ImageToAsciiDTO dto)
     {
-        int filesWritten = _processingService.Process(dto.Path, dto.Width, dto.Height, dto.OutPath);
-        return filesWritten;
+        string createdPath = _processingService.Process(
+            dto.Path, dto.Width, dto.Height, dto.OutPath);
+        return createdPath;
     }
 }
