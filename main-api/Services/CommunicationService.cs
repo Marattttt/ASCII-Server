@@ -12,10 +12,11 @@ public class CommunicationService
     public CommunicationService()
     {
     }
-    public async Task<string> ProcessImageAsync(ImageToAsciiDTO dto)
+    public async Task<string?> ProcessImageAsync(ImageToAsciiDTO dto)
     {
+        string? result = null;        
         using (HttpClient client = new HttpClient())
-        {
+        {   
             StringContent content = new StringContent(
                 JsonSerializer.Serialize<ImageToAsciiDTO>(dto),
                 Encoding.UTF8,
@@ -23,9 +24,10 @@ public class CommunicationService
             );
 
             HttpResponseMessage responseMessage = await client.PostAsync(_processingUrl, content);
+            if (responseMessage.ToString().Length < 1)
+                return null;
             Console.WriteLine(responseMessage);
         }
-
-        throw new NotImplementedException();
+        return result;
     } 
 }

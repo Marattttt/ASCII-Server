@@ -16,7 +16,7 @@ public class AsciiController : ControllerBase
     }
 
     [HttpPost]
-    public string ConvertToTxtFile(ImageToAsciiDTO dto)
+    public string Convert(ImageToAsciiDTO dto)
     {
         string createdPath = _processingService.Process(
             dto.Path, dto.Width, dto.Height, dto.OutPath);
