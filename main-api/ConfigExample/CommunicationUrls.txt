@@ -1,0 +1,6 @@
+namespace api.Configuration;
+
+public static class CommunicationUrls
+{
+    public const string ProcessingUrl = "http://localhost:5001/convert";
+}

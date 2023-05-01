@@ -5,6 +5,9 @@ public class ProcessingService
     private const string asciiRow = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~i!lI;:,\"^`\". ";
     private const int maxPixelLightness = byte.MaxValue * 3;
 
+    // 0 stands for the original size
+    // if 0 is passed to only one of parameters, aspect ratio is preserved
+    // if outPath is not provided, it is defaulted to savge under the same name in the same folder
     public string Process(string path, 
         int width = 0,
         int height = 0,
@@ -19,20 +22,16 @@ public class ProcessingService
         string result = String.Empty;
         using (Image<Rgba32> image = Image.Load<Rgba32>(path))
         {
-            bool isResizeNeeded = true;
-            if (width == 0 && height == 0)
-            {
+            if (width == 0)
                 width = image.Width;
+            else if (height == 0)
                 height = image.Height;
-                isResizeNeeded = false;
-            }
 
             result = makeAsciiTxtFile(
                 image, 
                 width, 
                 height, 
-                outPath,
-                isResizeNeeded);
+                outPath);
         };
         return result;
     }   
@@ -41,13 +40,11 @@ public class ProcessingService
         Image<Rgba32> image, 
         int width, 
         int height, 
-        string outPath, 
-        bool isResizeNeeded) 
+        string outPath) 
     {
         Console.WriteLine(outPath + "\n\n\n");
         FileStream fstream = File.Create(outPath);
         
-        if (isResizeNeeded)
         image.Mutate(accessor => {
             accessor.Resize(width, height);
         });
@@ -58,42 +55,24 @@ public class ProcessingService
             for (int y = 0; y < accessor.Height; y+=2)
             {
                 Span<Rgba32> pixelRow = accessor.GetRowSpan(y);
-
-                isSuccess = WritePixelRow(pixelRow, fstream);
-                if (!isSuccess)
-                    break;
+                WritePixelRow(pixelRow, fstream);
             }
         });
         fstream.Dispose();
         return isSuccess ? outPath : String.Empty;
     }
 
-    private bool WritePixelRow(Span<Rgba32> pixelRow, FileStream fileStream)
+    private void WritePixelRow(Span<Rgba32> pixelRow, FileStream fileStream)
     {
-        bool isSuccess = true;
         // pixelRow.Length has the same value as accessor.Width,
-        // but using pixelRow.Length allows the JIT to optimize away bounds checks:
+        // but using pixelRow.Length allows the JIT to optimize away bounds checks: 
         for (int x = 0; x < pixelRow.Length; x++)
         {
             char ascii = '\0';
-            try 
-            {
-                ascii = getAscii(pixelRow[x]);
-            }
-            catch(Exception)
-            {
-
-                Console.WriteLine("Exception while processing pixel: ");
-                Console.WriteLine(pixelRow[x].R + " " + pixelRow[x].G + " " + pixelRow[x].B + " " + pixelRow[x].A);
-                Console.WriteLine();
-                isSuccess = false;
-            }
-            if (isSuccess)
-                fileStream.Write(new byte[] { Convert.ToByte(ascii) });
+            ascii = getAscii(pixelRow[x]);
+            fileStream.Write(new byte[] { Convert.ToByte(ascii) });
         }
-        if (isSuccess)
-            fileStream.Write(new byte[] { Convert.ToByte('\n') });
-        return isSuccess;
+        fileStream.Write(new byte[] { Convert.ToByte('\n') });
     }
 
     private string getDefaultOutPath(string path) 

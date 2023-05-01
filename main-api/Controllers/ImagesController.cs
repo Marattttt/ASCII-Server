@@ -17,7 +17,7 @@ public class ImagesController : ControllerBase
     }
 
     [HttpPost()]
-    public async Task<ActionResult> Upload(IFormFile file)
+    public async Task<ActionResult> UploadAndProcess(IFormFile file)
     {
         string? outPath = await _imagesService.SaveFileAsync(
             file, 

@@ -3,16 +3,17 @@ using System.Text;
 using System.Text.Json;
 
 using api.Models;
+using api.Configuration;
 
 namespace api.Services;
 
 public class CommunicationService 
 {
-    //Needs changing
-    string _processingUrl = "http://localhost:5001/convert";
     public CommunicationService()
     {
     }
+
+    // Sends a post request to url defined in CommunicationUrls class
     public async Task<string?> ProcessImageAsync(ImageToAsciiDTO dto)
     {
         string? result = null;        
@@ -24,7 +25,9 @@ public class CommunicationService
                 "application/json"
             );
 
-            HttpResponseMessage responseMessage = await client.PostAsync(_processingUrl, content);
+            HttpResponseMessage responseMessage = await client.PostAsync(
+                CommunicationUrls.ProcessingUrl, 
+                content);
             if (responseMessage.StatusCode != HttpStatusCode.Created)
                 result = null;
             else 

@@ -8,45 +8,26 @@ namespace api.Services;
 
 public class ImagesService
 {
-    FileConfig _fileConfig;
-    IWebHostEnvironment _environment;
     IDataProtector _protector;
 
-    const long MaxFileSizeBytes = 5 * 1000000; //5 megabytes
-    public ImagesService(IWebHostEnvironment environment, IDataProtectionProvider dataProtectionProvider)
+    const long MaxFileSizeBytes = 5 * 1_000_000; //5 megabytes
+    public ImagesService(IDataProtectionProvider dataProtectionProvider)
     {
-        _environment = environment;
-
-        string configPath = Path.Combine(
-            environment.ContentRootPath, 
-            "Config/FileSettings.json");
-
-        string json = File.ReadAllText(configPath);
-
-        try {
-            _fileConfig = JsonSerializer.Deserialize<FileConfig>(json)!;
-        } 
-        catch (Exception e)
-        {
-            Console.WriteLine($"Config file at {configPath} is not alligned with FileConfig class");
-            Console.WriteLine("Exception message: ", e.Message);
-            _fileConfig = new FileConfig();
-        }
-        _protector = dataProtectionProvider.CreateProtector(_fileConfig.FileNameProtectionSeed);
+        _protector = dataProtectionProvider.CreateProtector(FileConfig.FileNameProtectionSeed);
     }
+
+    //Method returns path to the saved file, rewrites files with the same name and sender 
+    //and returns null if faces an error
     public async Task<string?> SaveFileAsync(IFormFile file, string sender)
     {
         if (!isFileValid(file))
             return null;
-        
-        Console.WriteLine(_fileConfig.OutputDirectory);
-        Console.WriteLine(_fileConfig.FileNameProtectionSeed);
 
         string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         string fileNameToProtect = file.FileName.Remove(file.FileName.LastIndexOf('.'));
 
         string protectedFileName = _protector.Protect(fileNameToProtect);
-        string senderOutputDirectory = Path.Combine(_fileConfig.OutputDirectory, sender);
+        string senderOutputDirectory = Path.Combine(FileConfig.OutputDirectory, sender);
         string outPath = Path.Combine(
             senderOutputDirectory,
             protectedFileName + extension);
