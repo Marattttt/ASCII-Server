@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 
 using api.Services;
@@ -18,19 +17,21 @@ public class ImagesController : ControllerBase
     }
 
     [HttpPost()]
-    public async Task<ActionResult<string>> Upload(IFormFile file)
+    public async Task<ActionResult> Upload(IFormFile file)
     {
         string? outPath = await _imagesService.SaveFileAsync(
             file, 
             HttpContext.Request.Host.Value);
 
         if (outPath is null)
-            return BadRequest();
+            return BadRequest("Error saving file");
 
         ImageToAsciiDTO dto = new ImageToAsciiDTO() {
             Path = outPath
         };
-        return await _communicationService.ProcessImageAsync(dto);
-
+        string? processingResult = await _communicationService.ProcessImageAsync(dto);
+        if (processingResult is null)
+            return BadRequest("Error processing file");
+        return NoContent();
     }
 }

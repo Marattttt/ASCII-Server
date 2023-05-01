@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -10,6 +11,8 @@ public class ImagesService
     FileConfig _fileConfig;
     IWebHostEnvironment _environment;
     IDataProtector _protector;
+
+    const long MaxFileSizeBytes = 5 * 1000000; //5 megabytes
     public ImagesService(IWebHostEnvironment environment, IDataProtectionProvider dataProtectionProvider)
     {
         _environment = environment;
@@ -40,14 +43,18 @@ public class ImagesService
         Console.WriteLine(_fileConfig.FileNameProtectionSeed);
 
         string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        string fileNameToProtect = file.FileName.Remove(file.FileName.LastIndexOf('.')) + sender;
+        string fileNameToProtect = file.FileName.Remove(file.FileName.LastIndexOf('.'));
 
         string protectedFileName = _protector.Protect(fileNameToProtect);
-
-        string outPath = Path.Combine(_fileConfig.OutputDirectory, protectedFileName + extension);
+        string senderOutputDirectory = Path.Combine(_fileConfig.OutputDirectory, sender);
+        string outPath = Path.Combine(
+            senderOutputDirectory,
+            protectedFileName + extension);
         
         if (File.Exists(outPath))
             File.Delete(outPath);
+        if (!Directory.Exists(senderOutputDirectory))
+            Directory.CreateDirectory(senderOutputDirectory);
         
         using (var stream = File.Create(outPath))
         {
@@ -58,7 +65,7 @@ public class ImagesService
 
     private bool isFileValid(IFormFile file)
     {
-        if (file.Length <= 0)
+        if (file.Length <= 0 || file.Length > MaxFileSizeBytes)
             return false;
 
         string[] allowedExtensions = { ".jpg", ".png", ".jpeg" };

@@ -6,7 +6,7 @@ using processing.Models;
 namespace processing.Controllers;
 
 [ApiController]
-[Route("[controller]/[action]")]
+[Route("[action]")]
 public class AsciiController : ControllerBase
 {
     ProcessingService _processingService;
@@ -20,6 +20,7 @@ public class AsciiController : ControllerBase
     {
         string createdPath = _processingService.Process(
             dto.Path, dto.Width, dto.Height, dto.OutPath);
+        Response.StatusCode = 201;
         return createdPath;
     }
 }
