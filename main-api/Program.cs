@@ -1,4 +1,5 @@
 using api.Services;
+using api.Policies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +11,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("UserId", UserIdAuthorizationPolicy.UserIdPolicy());
+});
 
 builder.Services.AddScoped<ImagesService>();
 builder.Services.AddScoped<CommunicationService>();
+builder.Services.AddScoped<FilePathService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

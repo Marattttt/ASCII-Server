@@ -7,10 +7,10 @@
     <title>Document</title>
 </head>
 <body style="background-color: darkgrey;">
-  <form method="post" enctype="multipart/form-data" action="http://localhost:5000/images/upload">
+  <form method="post" enctype="multipart/form-data" action="http://localhost:5000/images/UploadAndProcess">
       <div>
           <label for="file">Choose file to upload</label>
-          <input type="file" id="file" name="file" multiple />
+          <input type="file" id="file" name="file"  />
       </div>
       <div>
           <button type="submit">Submit</button> 
@@ -40,6 +40,7 @@
 
       resultElement.value = 'Result: ' + response.status + ' ' + 
         response.statusText;
+        
       } catch (error) {
         console.error('Error:', error);
       }
