@@ -1,5 +1,4 @@
 using api.Services;
-using api.Policies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,10 +9,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization(options => {
-    options.AddPolicy("UserId", UserIdAuthorizationPolicy.UserIdPolicy());
-});
 
 builder.Services.AddScoped<ImagesService>();
 builder.Services.AddScoped<CommunicationService>();
