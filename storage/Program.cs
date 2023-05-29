@@ -1,5 +1,8 @@
-using storage.Data;
+using System.Net.Mime;
 using Microsoft.EntityFrameworkCore;
+
+using storage.Data;
+using storage.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("UserDbContext")));
+
+builder.Services.AddScoped<ImagesService>();
 
 var app = builder.Build();
 
