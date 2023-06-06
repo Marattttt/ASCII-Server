@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 
+using shared.DTOs;
+
 using api.Services;
-using api.Models;
 
 namespace api.Controllers;
 
@@ -21,7 +22,7 @@ public class ImagesController : ControllerBase
             return BadRequest("File not received");
         }
         file.FileName.Trim().ToLowerInvariant();
-        string? userId = getUserId();
+        string? userId = GetUserAsyncId();
         if (userId is null) {
             return BadRequest("No user-id query parameter specified");
         }
@@ -49,7 +50,7 @@ public class ImagesController : ControllerBase
             return BadRequest("No file-name query parameter");
         }
         fileName.Trim().ToLowerInvariant();
-        string? userId = getUserId();
+        string? userId = GetUserAsyncId();
         if (userId is null) {
             return BadRequest("No user-id query parameter");
         }
@@ -63,7 +64,7 @@ public class ImagesController : ControllerBase
 
         return File(stream, mimeType, fileName);
     }    
-    private string? getUserId() {
+    private string? GetUserAsyncId() {
         return Request.Query["user-id"];
     }
 }

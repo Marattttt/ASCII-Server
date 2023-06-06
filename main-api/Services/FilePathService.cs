@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
 
-using api.Configuration;
+using shared.Config;
 
 namespace api.Services;
 

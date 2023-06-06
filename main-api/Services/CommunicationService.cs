@@ -2,8 +2,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-using api.Models;
-using api.Configuration;
+using shared.DTOs;
+using shared.Config;
 
 namespace api.Services;
 

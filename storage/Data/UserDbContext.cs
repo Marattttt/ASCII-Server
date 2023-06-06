@@ -11,9 +11,7 @@ public class UserDbContext : DbContext {
         : base(options)
     {
     }
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //         => optionsBuilder.UseNpgsql("Host=localhost:5432;Database=ToDoNew;Username=user_name;Password=user_password");
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(
@@ -30,6 +28,5 @@ public class UserDbContext : DbContext {
                 img.HasKey(img => img.ImageId);
             }
         );
-
     }
 }

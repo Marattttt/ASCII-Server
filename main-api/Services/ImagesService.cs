@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Reflection;
 using Microsoft.AspNetCore.DataProtection;
 
-using api.Configuration;
+using shared.Config;
 
 namespace api.Services;
 
@@ -57,7 +57,6 @@ public class ImagesService
         if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension)) {
             return false;
         }
-
         return true;
     }
 }
