@@ -7,9 +7,9 @@ using storage.Models;
 
 namespace storage.Services;
 
-public class ImagesService {
+public class UsersService {
     private UserDbContext _userContext;
-    public ImagesService(UserDbContext userDbContext) {
+    public UsersService(UserDbContext userDbContext) {
         _userContext = userDbContext;
     }
 
@@ -19,13 +19,27 @@ public class ImagesService {
         return user;
     }
 
-    public async Task<ImagesServiceResult> SaveImageDataAsync (User user, ImageData img) {
+    public async Task<User?> CreateUserAsync (FullUserInfoDTO dto) {
+        User? existingUser = await GetUserAsync(dto.UserId);
+        if (existingUser is not null) {
+            throw new ArgumentException("User already exists");
+        }
+        User? newUser = ConversionService.FullUserInfoDtoToUser(dto);
+        if (newUser is null) {
+            return null;
+        }
+        _userContext.Add(newUser);
+        await _userContext.SaveChangesAsync();
+        return newUser;
+    }
+
+    public async Task<UsersServiceResult> SaveImageDataAsync (User user, ImageData img) {
         img.FileName.Trim().ToLowerInvariant();
 
         using (var memStream = new MemoryStream(img.Content)) {
             bool isRecognizableType = FileTypeValidator.IsImage(memStream);
             if (!isRecognizableType) {
-                return ImagesServiceResult.FileTypeNotAllowed;
+                return UsersServiceResult.FileTypeNotAllowed;
             }
             IFileType fileType = FileTypeValidator.GetFileType(memStream);
             Console.WriteLine(fileType.ToString());
@@ -33,7 +47,7 @@ public class ImagesService {
             Console.WriteLine(fileType.Extension);
         }
         if (user is null) {
-            // return ImagesServiceResult.UserNotFound;
+            // return UsersServiceResult.UserNotFound;
             user = new User(){ Uploads = new List<ImageData>() };
             _userContext.Users.Add(user);
         }
@@ -50,25 +64,22 @@ public class ImagesService {
         }
         
         await _userContext.SaveChangesAsync();
-        return ImagesServiceResult.Success;
+        return UsersServiceResult.Success;
     }
-    public (ImagesServiceResult result, ImageData? imageData) GetImageData (User user, string fileName) {
-        ImagesServiceResult result = ImagesServiceResult.Success;
+    public (UsersServiceResult result, ImageData? imageData) GetImageData (User user, string fileName) {
+        UsersServiceResult result = UsersServiceResult.Success;
 
         List<ImageData> imageData = _userContext.Entry(user).Collection(u => u.Uploads)
                                 .Query()
                                 .Where(img => img.FileName == fileName)
                                 .ToList();
-
         if (imageData.Count() == 0) {
-            result = ImagesServiceResult.ImageNotFound;
+            result = UsersServiceResult.ImageNotFound;
         }
 
-        if (result != ImagesServiceResult.Success) {
+        if (result != UsersServiceResult.Success) {
             return (result, null);
         }
-
-
         return (result, imageData[0]);
     }
 }

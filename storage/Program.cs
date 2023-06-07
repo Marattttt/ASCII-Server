@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("UserDbContext")));
 
-builder.Services.AddScoped<ImagesService>();
+builder.Services.AddScoped<UsersService>();
 
 var app = builder.Build();
 

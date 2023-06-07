@@ -1,6 +1,6 @@
 namespace storage.Services;
 
-public enum ImagesServiceResult {
+public enum UsersServiceResult {
     Success,
     UserNotFound,
     DtoNotRecognized,
