@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
+using shared.DTOs;
 using processing.Services;
-using processing.Models;
 
 namespace processing.Controllers;
 

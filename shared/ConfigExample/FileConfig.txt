@@ -1,7 +1,8 @@
-namespace shared.Config;
+namespace api.Configuration;
 
 public static class FileConfig
 {
     public const string OutputDirectory = "your/path";
     public const string FileNameProtectionSeed = "seed";
+    public const string TempDirectory = "/Users/marat/Projects/ASCII-Server/temp/";
 }

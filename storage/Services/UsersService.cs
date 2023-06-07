@@ -24,10 +24,8 @@ public class UsersService {
         if (existingUser is not null) {
             throw new ArgumentException("User already exists");
         }
-        User? newUser = ConversionService.FullUserInfoDtoToUser(dto);
-        if (newUser is null) {
-            return null;
-        }
+        User? newUser = new User(dto);
+        
         _userContext.Add(newUser);
         await _userContext.SaveChangesAsync();
         return newUser;

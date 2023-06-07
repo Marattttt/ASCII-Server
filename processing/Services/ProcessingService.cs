@@ -1,3 +1,5 @@
+using shared.DTOs;
+
 namespace processing.Services;
 
 public class ProcessingService

@@ -6,3 +6,4 @@ public class ImageToAsciiDTO
     public int Height { get; set; } = 0;
     public string? OutPath { get; set; } = null;
 }
+

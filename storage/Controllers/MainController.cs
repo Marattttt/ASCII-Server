@@ -58,10 +58,15 @@ public class MainController: ControllerBase {
             await stream.CopyToAsync(memoryStream);
             dto.Content = memoryStream.ToArray();
         }
+        ImageData imageData = new ImageData() {
+            Content = new byte[0]
+        };
+        try {
 
-        ImageData? imageData = ConversionService.ImageDtoToImageData(dto);
-        if (imageData is null) {
-            return BadRequest("Cannot read image data");
+            imageData = new ImageData(dto);
+        }
+        catch (ArgumentNullException) {
+            return  BadRequest("Cannot read image data");
         }
 
         UsersServiceResult result = await _usersService.SaveImageDataAsync(user, imageData);
