@@ -16,7 +16,7 @@ public class MainController: ControllerBase {
         _usersService = imagesService;
     }
 
-    [HttpGet("user/new/")]
+    [HttpPost("user/new/")]
     public async Task<ActionResult<User>> CreateNewUser(FullUserInfoDTO dto) {
         User? existingUser = await _usersService.GetUserAsync(dto.UserId);
         if (existingUser is not null) {
@@ -26,11 +26,11 @@ public class MainController: ControllerBase {
         if (newUser is null) {
             return BadRequest("Could not create user from DTO");
         }
-        return newUser;
+        return NoContent();
     }
 
     [HttpGet("user/{id:int}")] //http://storage/user/123
-    public async Task<ActionResult<User>> GetUserAsyncById(int id) {
+    public async Task<ActionResult<User>> GetUserById(int id) {
         User? user = await _usersService.GetUserAsync(id);
         if (user is null) {
             return BadRequest("User not found");
