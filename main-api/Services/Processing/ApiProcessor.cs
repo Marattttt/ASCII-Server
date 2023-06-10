@@ -7,27 +7,21 @@ using shared.Config;
 
 namespace api.Services;
 
-public class CommunicationService 
-{
-    public CommunicationService()
-    {
-    }
+public class ApiProcessor {
 
-    // Sends a post request to url defined in CommunicationUrls class
-    public async Task<string?> ProcessImageAsync(ImageToAsciiDTO dto)
-    {
+    // Sends an http post request to url defined in CommunicationUrls class
+    public async Task<string?> ProcessImageAsync(ImageToAsciiDTO dto) {
         string? result = null;        
-        using (HttpClient client = new HttpClient())
-        {   
+        using (HttpClient client = new HttpClient()) {   
             StringContent content = new StringContent(
                 JsonSerializer.Serialize<ImageToAsciiDTO>(dto),
                 Encoding.UTF8,
                 "application/json"
             );
-
             HttpResponseMessage responseMessage = await client.PostAsync(
                 CommunicationUrls.ProcessingUrl, 
-                content);
+                content
+            );
             if (responseMessage.StatusCode != HttpStatusCode.Created)
                 result = null;
             else 
