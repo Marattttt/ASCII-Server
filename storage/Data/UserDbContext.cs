@@ -17,6 +17,10 @@ public class UserDbContext : DbContext {
         modelBuilder.Entity<User>(
             usr => {
                 usr.HasKey(user => user.UserId);
+                usr.Property(user => user.Password)
+                    .IsRequired();
+                usr.Property(user => user.UserName)
+                    .IsRequired();
                 usr.HasMany(user => user.Uploads)
                     .WithOne(img => img.Owner)
                     .HasForeignKey(img => img.UserId)

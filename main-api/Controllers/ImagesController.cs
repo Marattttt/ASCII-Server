@@ -1,70 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
+using shared.DataChecking;
 
 using api.Services;
 
 namespace api.Controllers;
 
-[Route("[controller]")]
-public class ImagesController : ControllerBase
-{
-    ImagesService _imagesService;
-    CommunicationService _communicationService;
-    public ImagesController(ImagesService imagesService, CommunicationService communicationService) {
-        _imagesService = imagesService;
-        _communicationService = communicationService;
+[Route("")]
+public class ImagesController : ControllerBase {
+    IImageProcessor _imgProcessor;
+    IUsersManager _usersManager;
+    public ImagesController(StorageUsersManager manager, ApiImageProcessor processor) {
+        _imgProcessor = processor;
+        _usersManager = manager;
     }
 
-    [HttpPost("UploadAndProcess")]
-    public async Task<ActionResult> UploadAndProcess(IFormFile file) {
-        if (file is null) {
-            return BadRequest("File not received");
+    [HttpPost("user/new")]
+    public async Task<ActionResult> CreateUserAsync(FullUserInfoDTO dto) {
+        string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
+        if (dtoErrorMessage != String.Empty) {
+            return BadRequest(dtoErrorMessage);
         }
-        file.FileName.Trim().ToLowerInvariant();
-        string? userId = GetUserAsyncId();
-        if (userId is null) {
-            return BadRequest("No user-id query parameter specified");
-        }
-        userId.Trim().ToLowerInvariant();
-
-        string? outPath = await _imagesService.SaveFileAsync(file, userId);
-        if (outPath is null) {
-            return BadRequest("Error saving file");
-        }
-
-        ImageToAsciiDTO dto = new ImageToAsciiDTO() {
-            Path = outPath
-        };
-        string? processingResult = await _communicationService.ProcessImageAsync(dto);
-        if (processingResult is null) {
-            return BadRequest("Error processing file");
+        string createUserErrorMessage = await _usersManager.CreateUserAsync(dto);
+        if (createUserErrorMessage != String.Empty) {
+            return BadRequest(createUserErrorMessage);
         }
         return NoContent();
     }
-
-    [HttpGet()]
-    public ActionResult Download() {
-        string? fileName = Request.Query["file-name"];
-        if (fileName is null) {
-            return BadRequest("No file-name query parameter");
-        }
-        fileName.Trim().ToLowerInvariant();
-        string? userId = GetUserAsyncId();
-        if (userId is null) {
-            return BadRequest("No user-id query parameter");
-        }
-
-        Stream? stream = _imagesService.GetFile(fileName, userId);
-        if(stream == null) {
-            return BadRequest("File not found"); 
-        }
-
-        string mimeType = "application/octet-stream";
-
-        return File(stream, mimeType, fileName);
-    }    
-    private string? GetUserAsyncId() {
-        return Request.Query["user-id"];
-    }
+    
 }

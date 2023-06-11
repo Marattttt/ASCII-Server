@@ -7,7 +7,7 @@ using shared.Config;
 
 namespace api.Services;
 
-public class ApiProcessor {
+public class ApiImageProcessor : IImageProcessor {
 
     // Sends an http post request to url defined in CommunicationUrls class
     public async Task<string?> ProcessImageAsync(ImageToAsciiDTO dto) {

@@ -2,6 +2,8 @@ using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
+using shared.DataChecking;
+
 using storage.Services;
 using storage.Models;
 
@@ -18,6 +20,11 @@ public class MainController: ControllerBase {
 
     [HttpPost("user/new/")]
     public async Task<ActionResult<User>> CreateNewUser(FullUserInfoDTO dto) {
+        string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
+        if (dtoErrorMessage != String.Empty) {
+            return BadRequest(dtoErrorMessage);
+        }
+        
         User? existingUser = await _usersService.GetUserAsync(dto.UserId);
         if (existingUser is not null) {
             return BadRequest("User already exists");
