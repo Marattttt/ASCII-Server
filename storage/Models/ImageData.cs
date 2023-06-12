@@ -8,7 +8,7 @@ public class ImageData {
     public string FileName { get; set; } = String.Empty;    
     public string FileType { get; set; } = String.Empty;
     public required byte[] Content { get; set; }
-    public string? ASCII { get; set; }
+    public char[] ASCII { get; set; } = new char[0];
     public int UserId { get; set; }
     public User? Owner { get; set; }
 
@@ -23,7 +23,7 @@ public class ImageData {
         UserId = dto.UserId;
         FileName = dto.FileName;
         FileType = dto.FileType;
-        ASCII = dto.ASCII;
+        ASCII = dto.ASCII ?? new char[0];
         Content = dto.Content;
     }
     public ImageDataDTO ToDTO() {

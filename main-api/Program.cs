@@ -11,7 +11,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<ApiImageProcessor>();
+builder.Services.AddTransient<LocalFilesManager>();
+
 builder.Services.AddScoped<StorageUsersManager>();
+builder.Services.AddScoped<ApiUploadsManager>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

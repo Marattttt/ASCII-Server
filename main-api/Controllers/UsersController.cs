@@ -7,17 +7,17 @@ using api.Services;
 
 namespace api.Controllers;
 
-[Route("")]
-public class ImagesController : ControllerBase {
-    IImageProcessor _imgProcessor;
+[ApiController]
+[Route("users")]
+public class UsersController : ControllerBase {
     IUsersManager _usersManager;
-    public ImagesController(StorageUsersManager manager, ApiImageProcessor processor) {
-        _imgProcessor = processor;
-        _usersManager = manager;
+    public UsersController(
+        StorageUsersManager usersManager) {
+        _usersManager = usersManager;
     }
 
     [HttpPost("user/new")]
-    public async Task<ActionResult> CreateUserAsync(FullUserInfoDTO dto) {
+    public async Task<ActionResult> CreateUser(FullUserInfoDTO dto) {
         string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
         if (dtoErrorMessage != String.Empty) {
             return BadRequest(dtoErrorMessage);
@@ -28,5 +28,4 @@ public class ImagesController : ControllerBase {
         }
         return NoContent();
     }
-    
 }

@@ -5,4 +5,5 @@ public static class FileConfig
     public const string OutputDirectory = "your/path";
     public const string FileNameProtectionSeed = "seed";
     public const string TempDirectory = "/Users/marat/Projects/ASCII-Server/temp/";
+    public const int MaxFileSizeBytes = 100 * 1_000_000; //100 megabytes
 }

@@ -1,4 +1,3 @@
-using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
@@ -12,6 +11,9 @@ namespace storage.Controllers;
 [ApiController]
 [Route("")] //https://storage/
 public class MainController: ControllerBase {
+
+    //up to 500 chars with the utf 8 max single char size of 4 bytes in mind
+    const int MaxBufferSize = 500 * 4; 
     UsersService _usersService;
 
     public MainController(UsersService imagesService) {
@@ -45,49 +47,55 @@ public class MainController: ControllerBase {
         return Ok(user);
     }
 
-    [HttpPost("user/images/new")] //http:storage/user/images/new + form with image data DTO
-    public async Task<ActionResult> SaveImageAsync(
-        [FromForm] ImageDataDTO dto) {
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(dto));
-
+    //Requires FileName to save as and path to the temporary file for contents
+    //http://storage/user/images/new
+    [HttpPost("user/images/new")] 
+    public async Task<ActionResult> SaveImageFromLocalStorage(
+        [FromBody] ImageDataDTO dto) {
         User? user = await _usersService.GetUserAsync(dto.UserId);
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(dto));
 
         if (user is null) {
             return BadRequest("User not found");
         }
 
-        using (MemoryStream memoryStream = new MemoryStream()) {
-            Stream? stream = Request.Form.Files[0]?.OpenReadStream();
-            if (stream is null || stream.Length == 0) {
-                return BadRequest("Cannot find file");
-            }
-            
-            await stream.CopyToAsync(memoryStream);
-            dto.Content = memoryStream.ToArray();
+        if (dto.Path is null) {
+            return BadRequest("Path to content is not provided");
         }
-        ImageData imageData = new ImageData() {
-            Content = new byte[0]
-        };
-        try {
-
-            imageData = new ImageData(dto);
+    
+        using (FileStream fs = new FileStream(dto.Path, FileMode.Open)) {
+            dto.Content = new byte[fs.Length];
+            await fs.ReadAsync(dto.Content, 0, (int)fs.Length);
         }
-        catch (ArgumentNullException) {
-            return  BadRequest("Cannot read image data");
-        }
+        
+        ImageData imageData = new ImageData(dto);
 
         UsersServiceResult result = await _usersService.SaveImageDataAsync(user, imageData);
         if (result == UsersServiceResult.Success) {
             return NoContent();
         }
-        return BadRequest(result);
+        return BadRequest(result.ToString());
     }
 
-    [HttpGet("user/{userId:int}/images/{fileName:alpha}")]
-    public async Task<ActionResult<string>>  GetPathToImage(int userId, string fileName) {
+
+    //Requires an http get request with id defined in route and body containing
+    //the needed file name in utf 8 encoding
+    //Maximum body length is int32 max value
+    //http://storage/user/1/images/ + body="image.png"
+    [HttpGet("user/{userId:int}/images/")]
+    [Consumes("text/plain")]
+    public async Task<ActionResult<string>>  GetPathToImage(
+        [FromRoute] int userId) {
         User? user = await _usersService.GetUserAsync(userId);
         if (user is null) {
             return BadRequest("User not found");
+        }
+
+        string fileName = String.Empty;
+        try {
+            fileName = await new StreamReader(Request.Body).ReadToEndAsync();
+        } catch (ArgumentOutOfRangeException) {
+            return BadRequest("Body longer than int32 max value");
         }
 
         var result = _usersService.GetImageData(user, fileName);
@@ -95,7 +103,7 @@ public class MainController: ControllerBase {
             return BadRequest(result.result.ToString());
         }
 
-        string tempPath = await FileStorageService.SaveToTempFilePath(result.imageData.Content);
+        string tempPath = await FileStorage.SaveToTempFilePath(result.imageData.Content);
 
         return Ok(tempPath);
     }
