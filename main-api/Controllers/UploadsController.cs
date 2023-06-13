@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
@@ -17,8 +18,8 @@ public class UploadsController : ControllerBase {
         _uploadsManager = uploadsManager;
     }
 
-    //https://uploads/1/new + body
-    [HttpPost("{userId:int}/new")]
+    //https://uploads/user/1/new + body
+    [HttpPost("user/{userId:int}/new")]
     public async Task<ActionResult> UploadImage(
         [FromForm] IFormFile file,
         [FromForm] string fileName,
@@ -33,15 +34,15 @@ public class UploadsController : ControllerBase {
 
         ImageDataDTO dto = new ImageDataDTO(){
             UserId = userId,
-            FileName = fileName
+            FileName = fileName,
+            FileType = Path.GetExtension(file.FileName)
         };
         
-        byte[] buffer = new byte[file.Length];
+        dto.Content = new byte[file.Length];
         using (var stream = file.OpenReadStream()) {
-            await stream.ReadAsync(buffer, 0, (int)file.Length);
+            await stream.ReadAsync(dto.Content, 0, (int)file.Length);
         }
 
-        dto.Path = await _filesManager.SaveDataAsync(buffer, Path.GetExtension(fileName));
         string? uploadErrorMessage = await _uploadsManager.UploadImageAsync(dto);
         if (uploadErrorMessage is not null) {
             return BadRequest(uploadErrorMessage);

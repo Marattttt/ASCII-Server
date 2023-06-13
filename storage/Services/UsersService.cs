@@ -14,8 +14,7 @@ public class UsersService {
     }
 
     public async Task<User?> GetUserAsync (int userId) {
-        User? user;
-        user = await _userContext.Users.FindAsync(userId);
+        User? user = await _userContext.Users.FindAsync(userId);
         return user;
     }
 
