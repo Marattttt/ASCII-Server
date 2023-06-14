@@ -41,12 +41,13 @@ public class MainController: ControllerBase {
     }
 
     [HttpGet("user/{id:int}")] //http://storage/user/123
-    public async Task<ActionResult<User>> GetUserById(int id) {
+    public async Task<ActionResult<FullUserInfoDTO?>> GetUserById(int id) {
         User? user = await _usersService.GetUserAsync(id);
         if (user is null) {
             return BadRequest("User not found");
         }
-        return Ok(user);
+        FullUserInfoDTO dto = user.ToDto();
+        return Ok(dto);
     }
 
     //
@@ -89,7 +90,7 @@ public class MainController: ControllerBase {
     //http://storage/user/1/images/ + header="fileName:image.png"
     [HttpGet("user/{userId:int}/images/")]
     [Consumes("text/plain")]
-    public async Task<ActionResult>  GetImage(
+    public async Task<ActionResult> GetImage(
         [FromRoute] int userId,
         [FromHeader] string fileName) {
             

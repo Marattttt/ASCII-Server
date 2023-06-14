@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using shared.DTOs;
 using shared.Config;
@@ -9,10 +10,10 @@ using shared.DataChecking;
 namespace api.Services;
 
 public class StorageUsersManager : IUsersManager {
-    private List<FullUserInfoDTO> trackedUsers;
+    private List<FullUserInfoDTO> _trackedUsers;
     
     public StorageUsersManager() {
-        trackedUsers = new List<FullUserInfoDTO>();
+        _trackedUsers = new List<FullUserInfoDTO>();
     }
     public async Task<string> CreateUserAsync(FullUserInfoDTO dto) {
         string errorMessage = UserDataChecker.CheckFullUserDto(dto);
@@ -34,14 +35,14 @@ public class StorageUsersManager : IUsersManager {
             if (responseMessage.StatusCode != HttpStatusCode.NoContent) {
                 return responseMessage.Content.ToString() ?? "Unknown creation error";
             }
-            if (!trackedUsers.Any(usr => usr == dto))
-                trackedUsers.Add(dto);
+            if (!_trackedUsers.Any(usr => usr == dto))
+                _trackedUsers.Add(dto);
             return String.Empty;
         }
     }
 
     public async Task<FullUserInfoDTO?> GetUserInfoAsync (int userId) {
-        FullUserInfoDTO? tracked = trackedUsers.FirstOrDefault(
+        FullUserInfoDTO? tracked = _trackedUsers.FirstOrDefault(
             dto => dto?.UserId == userId, null);
         if (tracked is not null) {
             return tracked;
@@ -50,16 +51,32 @@ public class StorageUsersManager : IUsersManager {
             HttpResponseMessage responseMessage = await client.GetAsync(
                 CommunicationUrls.StorageUrl + $"user/{userId}"
             );
-            if (responseMessage.StatusCode != HttpStatusCode.NoContent) {
+            if (!responseMessage.IsSuccessStatusCode) {
                 return null;
             }
+            Console.WriteLine(await responseMessage.Content.ReadAsStringAsync());
+            var options = new JsonSerializerOptions {
+                PropertyNameCaseInsensitive = true
+            };
+
             FullUserInfoDTO? responseDto = JsonSerializer.Deserialize<FullUserInfoDTO>(
-                await responseMessage.Content.ReadAsStreamAsync());
+                await responseMessage.Content.ReadAsStringAsync(),
+                options);
             if (responseDto is null) {
                 return null;
             }
-            trackedUsers.Add(responseDto);
+            _trackedUsers.Add(responseDto);
             return responseDto;
+        }
+    }
+
+    public async Task DeleteUserAsync (int userId) {
+        using (HttpClient client = new HttpClient()) {
+            HttpResponseMessage responseMessage = await client.DeleteAsync(
+                CommunicationUrls.StorageUrl + $"user/{userId}"
+            );
+            _trackedUsers.RemoveAll(u => u.UserId == userId);
+            return;
         }
     }
 }

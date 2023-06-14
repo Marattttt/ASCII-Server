@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
 using shared.Config;
+using shared.DataChecking;
 using api.Services;
 
 [ApiController]
@@ -10,16 +11,19 @@ using api.Services;
 public class UploadsController : ControllerBase {
     IFilesManager _filesManager;
     IUploadsManager _uploadsManager;
+    IUsersManager _usersManager;
     public UploadsController(
         LocalFilesManager filesManager, 
-        ApiUploadsManager uploadsManager) {
+        ApiUploadsManager uploadsManager, 
+        StorageUsersManager storageUsersManager) {
         
         _filesManager = filesManager;
         _uploadsManager = uploadsManager;
+        _usersManager = storageUsersManager;
     }
 
-    //https://uploads/user/1/new + body
-    [HttpPost("user/{userId:int}/new")]
+    //https://api/uploads/user/1/images/new
+    [HttpPost("user/{userId:int}/images/new")]
     public async Task<ActionResult> UploadImage(
         [FromForm] IFormFile file,
         [FromForm] string fileName,
@@ -50,6 +54,7 @@ public class UploadsController : ControllerBase {
         return NoContent();
     }
 
+    //https://api/uploads/user/1/images
     [HttpGet("user/{userId:int}/images/")]
     public async Task<ActionResult> GetImage(
         [FromRoute] int userId,
@@ -62,9 +67,41 @@ public class UploadsController : ControllerBase {
         if (result.stream is null) {
             return BadRequest("Unknown error");
         }
-        // string contentType = ContentType.
+
         byte[] content = new byte[result.stream.Length];
         await result.stream.ReadAsync(content, 0, (int)result.stream.Length);
         return File(content, MediaTypeNames.Application.Octet);
+    }
+
+    //https://api/uploads/delete
+    //All data is from form
+    [HttpDelete("delete")]
+    public async Task<ActionResult> DeleteImage(
+        [FromForm] FullUserInfoDTO dto,
+        [FromForm] string fileName) {
+
+        string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
+        if (dtoErrorMessage != String.Empty) {
+            return BadRequest(dtoErrorMessage);
+        }
+        var existingUser = await _usersManager.GetUserInfoAsync(dto.UserId);
+        if (existingUser is null) {
+            return BadRequest("User not found");
+        }
+
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(existingUser));
+
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(dto));
+
+        if (existingUser.Password != dto.Password || existingUser.UserName != dto.UserName) {
+            return Unauthorized();
+        }
+
+        string? errorMessage = await _uploadsManager.DeleteImageAsync(dto.UserId, fileName);
+        
+        if (errorMessage is not null) {
+            return BadRequest(errorMessage);
+        }
+        return NoContent();
     }
 }

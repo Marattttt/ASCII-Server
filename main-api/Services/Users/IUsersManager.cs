@@ -7,4 +7,5 @@ public interface IUsersManager {
     //Returns error message
     public Task<string> CreateUserAsync(FullUserInfoDTO dto);
     public Task<FullUserInfoDTO?> GetUserInfoAsync (int userId);
+    public Task DeleteUserAsync (int userId);
 }

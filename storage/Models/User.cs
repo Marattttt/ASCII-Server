@@ -16,4 +16,11 @@ public class User {
         Password = dto.Password;
         Uploads = new List<ImageData>();
     }
+    public FullUserInfoDTO ToDto() {
+        return new FullUserInfoDTO () {
+            UserId = UserId,
+            UserName = UserName,
+            Password = Password
+        };
+    }
 }

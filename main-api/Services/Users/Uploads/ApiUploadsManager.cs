@@ -50,4 +50,25 @@ public class ApiUploadsManager : IUploadsManager {
             return (ms, null);
         }
     }
+
+    public async Task<string?> DeleteImageAsync(
+        int userId,
+        string fileName) {
+        
+        using (var client = new HttpClient()) {
+            
+            client.DefaultRequestHeaders.Add("fileName", fileName);
+
+            string endPoint = $"user/{userId}/images/";
+
+            var response = await client.DeleteAsync(
+                CommunicationUrls.StorageUrl + endPoint);
+            
+            if (!response.IsSuccessStatusCode) {
+                Console.WriteLine(await response.Content.ReadAsStringAsync() + response.StatusCode);
+                return await response.Content.ReadAsStringAsync();
+            }
+            return null;
+        }
+    }
 }
