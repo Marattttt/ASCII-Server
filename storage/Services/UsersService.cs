@@ -1,9 +1,13 @@
+using System;
 using FileTypeChecker;
 using FileTypeChecker.Abstracts;
+
+using System.Linq;
 
 using shared.DTOs;
 using storage.Data;
 using storage.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace storage.Services;
 
@@ -13,11 +17,17 @@ public class UsersService {
         _userContext = userDbContext;
     }
 
-    public async Task<User?> GetUserAsync (int userId) {
-        User? user = await _userContext.Users.FindAsync(userId);
+    public async Task<User?> GetUserAsync (int userId, bool loadUploads = false) {
+        User? user;
+        if (loadUploads) {
+            user = await _userContext.Users
+                .Include(u => u.Uploads)
+                .FirstAsync(u => u.UserId == userId);
+        } else {
+            user = await _userContext.Users.FindAsync(userId);
+        }
         return user;
     }
-
     public async Task<User?> CreateUserAsync (FullUserInfoDTO dto) {
         User? existingUser = await GetUserAsync(dto.UserId);
         if (existingUser is not null) {
@@ -37,9 +47,7 @@ public class UsersService {
                 return UsersServiceResult.FileTypeNotAllowed;
             }
             IFileType fileType = FileTypeValidator.GetFileType(memStream);
-            Console.WriteLine(fileType.ToString());
-            Console.WriteLine(fileType.Name);
-            Console.WriteLine(fileType.Extension);
+            img.FileType = fileType.Extension;
         }
         if (user is null) {
             // return UsersServiceResult.UserNotFound;
@@ -61,7 +69,9 @@ public class UsersService {
         await _userContext.SaveChangesAsync();
         return UsersServiceResult.Success;
     }
-    public (UsersServiceResult result, ImageData? imageData) GetImageData (User user, string fileName) {
+    public (UsersServiceResult result, ImageData? imageData) GetImageData (
+        User user, string fileName) {
+
         UsersServiceResult result = UsersServiceResult.Success;
 
         List<ImageData> imageData = _userContext.Entry(user).Collection(u => u.Uploads)
@@ -76,5 +86,20 @@ public class UsersService {
             return (result, null);
         }
         return (result, imageData[0]);
+    }
+
+    public async Task DeleteImage (User user, string fileName) {
+        ImageData? imageData = user.Uploads.FirstOrDefault(
+            i => i?.FileName == fileName, null);
+        if (imageData is null) {
+            return;
+        }
+        _userContext.Remove(imageData);
+        await _userContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteUser (User user) {
+        _userContext.Users.Remove(user);
+        await _userContext.SaveChangesAsync();
     }
 }

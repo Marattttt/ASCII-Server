@@ -84,10 +84,9 @@ public class MainController: ControllerBase {
     }
 
 
-    //Requires an http get request with id defined in route and body containing
-    //the needed file name in utf 8 encoding
-    //Maximum body length is int32 max value
-    //http://storage/user/1/images/ + body="image.png"
+    //Requires an http get request with id defined in route 
+    //and header with the needed fileName
+    //http://storage/user/1/images/ + header="fileName:image.png"
     [HttpGet("user/{userId:int}/images/")]
     [Consumes("text/plain")]
     public async Task<ActionResult>  GetImage(
@@ -105,5 +104,28 @@ public class MainController: ControllerBase {
         }
 
         return File(result.imageData.Content, MediaTypeNames.Application.Octet);
+    }
+    
+    [HttpDelete("user/{userId:int}")]
+    public async Task<ActionResult> DeleteUser([FromRoute] int userId) {
+        User? user = await _usersService.GetUserAsync(userId);
+        if (user is null) {
+            return BadRequest("User not found");
+        }
+        await _usersService.DeleteUser(user);
+        return NoContent();
+    }
+
+    [HttpDelete("user/{userId:int}/images/")]
+    public async Task<ActionResult> DeleteImage(
+        [FromRoute] int userId,
+        [FromHeader] string fileName) {
+        
+        User? user = await _usersService.GetUserAsync(userId, true);
+        if (user is null) {
+            return BadRequest("User not found");
+        }
+        await _usersService.DeleteImage(user, fileName);
+        return NoContent();
     }
 }

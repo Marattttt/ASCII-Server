@@ -17,7 +17,7 @@ public class UsersController : ControllerBase {
     }
 
     [HttpPost("user/new")]
-    public async Task<ActionResult> CreateUser(FullUserInfoDTO dto) {
+    public async Task<ActionResult> CreateUser([FromForm] FullUserInfoDTO dto) {
         string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
         if (dtoErrorMessage != String.Empty) {
             return BadRequest(dtoErrorMessage);
