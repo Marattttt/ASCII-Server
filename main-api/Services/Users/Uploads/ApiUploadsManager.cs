@@ -1,9 +1,4 @@
-using System.Reflection.Metadata;
-using System.Net.Http.Headers;
-using System.Net.Http;
 using System.Net;
-using System.Text;
-using System.Text.Json;
 
 using shared.DTOs;
 using shared.Config;
@@ -34,6 +29,25 @@ public class ApiUploadsManager : IUploadsManager {
             }
 
             return await responseMessage.Content.ReadAsStringAsync();
+        }
+    }
+    public async Task<(Stream? stream, string? errorMessage)> GetImageAsync(
+        int userId, 
+        string fileName) {
+        using (var client = new HttpClient()) {
+            
+            client.DefaultRequestHeaders.Add("fileName", fileName);
+            string endPoint = $"user/{userId}/images";
+
+            var response = await client.GetAsync(
+                CommunicationUrls.StorageUrl + endPoint);
+
+            if (!response.IsSuccessStatusCode) {
+                return (null, await response.Content.ReadAsStringAsync());
+            }
+
+            var ms = await response.Content.ReadAsStreamAsync();
+            return (ms, null);
         }
     }
 }

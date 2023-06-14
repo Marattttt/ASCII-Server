@@ -49,4 +49,22 @@ public class UploadsController : ControllerBase {
         }
         return NoContent();
     }
+
+    [HttpGet("user/{userId:int}/images/")]
+    public async Task<ActionResult> GetImage(
+        [FromRoute] int userId,
+        [FromHeader] string fileName) {
+
+        var result = await _uploadsManager.GetImageAsync(userId, fileName);
+        if (result.errorMessage is not null) {
+            return BadRequest(result.errorMessage.ToString());
+        }
+        if (result.stream is null) {
+            return BadRequest("Unknown error");
+        }
+        // string contentType = ContentType.
+        byte[] content = new byte[result.stream.Length];
+        await result.stream.ReadAsync(content, 0, (int)result.stream.Length);
+        return File(content, MediaTypeNames.Application.Octet);
+    }
 }

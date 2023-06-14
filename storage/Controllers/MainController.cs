@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
@@ -92,9 +93,7 @@ public class MainController: ControllerBase {
     public async Task<ActionResult>  GetImage(
         [FromRoute] int userId,
         [FromHeader] string fileName) {
-
-        const string contentType = "application/octet-stream";
-
+            
         User? user = await _usersService.GetUserAsync(userId);
         if (user is null) {
             return BadRequest("User not found");
@@ -105,6 +104,6 @@ public class MainController: ControllerBase {
             return BadRequest(result.result.ToString());
         }
 
-        return File(result.imageData.Content, contentType);
+        return File(result.imageData.Content, MediaTypeNames.Application.Octet);
     }
 }
