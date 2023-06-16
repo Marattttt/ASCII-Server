@@ -1,0 +1,13 @@
+using System.Collections.Immutable;
+
+namespace shared.Config;
+public static class SupportedTypes 
+{
+    public static ImmutableArray<string> MediaTypes = new List<string> {
+        "image/png", "image/webp", "image/bmp", "image/pbm", "image/tga", "image/jpeg", "image/tiff" 
+    }.ToImmutableArray();
+        
+    public static ImmutableArray<string> Extensions = new List<string> {
+        ".png", ".webp", ".bmp", ".pbm", ".tga", ".jpeg", ".tiff"
+    }.ToImmutableArray();
+}

@@ -13,6 +13,14 @@ builder.Services.AddScoped<ProcessingService>();
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    var type = context.Request.ContentType;
+    Console.WriteLine(type);
+    await next();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
