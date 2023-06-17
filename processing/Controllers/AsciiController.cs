@@ -10,21 +10,6 @@ namespace processing.Controllers;
 [Route("[action]")]
 public class AsciiController : ControllerBase
 {
-<<<<<<< Updated upstream
-    ProcessingService _processingService;
-    public AsciiController(ProcessingService service)
-    {
-        _processingService = service;
-    }
-
-    [HttpPost]
-    public string Convert(ImageToAsciiDTO dto)
-    {
-        string createdPath = _processingService.Process(
-            dto.Path, dto.Width, dto.Height, dto.OutPath);
-        Response.StatusCode = 201;
-        return createdPath;
-=======
     Processor _processor;
 
     public AsciiController(AsciiProcessor asciiProcessor) {
@@ -68,6 +53,6 @@ public class AsciiController : ControllerBase
 
         await Response.BodyWriter.WriteAsync(result);
         return new EmptyResult();
->>>>>>> Stashed changes
+
     }
 }

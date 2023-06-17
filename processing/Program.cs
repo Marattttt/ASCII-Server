@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<ProcessingService>();
+builder.Services.AddScoped<AsciiProcessor>();
 
 var app = builder.Build();
 
@@ -17,7 +17,6 @@ app.Use(async (context, next) =>
 {
     context.Request.EnableBuffering();
     var type = context.Request.ContentType;
-    Console.WriteLine(type);
     await next();
 });
 
