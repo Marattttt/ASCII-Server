@@ -59,16 +59,16 @@ public class MainController: ControllerBase {
     [Consumes("multipart/form-data")]
     [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> SaveImage(
-        [FromForm] int userId,
-        [FromForm] string fileName,
-        [FromForm] string fileType,
+        [FromHeader] int UserId,
+        [FromHeader] string FileName,
+        [FromHeader] string FileType,
         [FromForm] IFormFile image,
         [FromForm] IFormFile? processed) {
 
         ImageDataDTO dto = new ImageDataDTO() {
-            UserId = userId,
-            FileName = fileName,
-            FileType = fileType
+            UserId = UserId,
+            FileName = FileName,
+            FileType = FileType
         };
 
         if (Request.Form.Files.Count() > 2 || Request.Form.Files.Count() == 0) {
@@ -97,12 +97,6 @@ public class MainController: ControllerBase {
             int processedLength = (int)processed.Length;
             dto.Text = new byte[processedLength];
             await processed.OpenReadStream().ReadAsync(dto.Text);
-        }
-
-        using (var ms = new MemoryStream(dto.Text!)) {
-            var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
-            string? test = reader.ReadLine();
-            Console.WriteLine(test);
         }
 
         UsersServiceResult result = await _usersService

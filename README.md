@@ -37,4 +37,4 @@ Main api uses static Shared/Config/CommunicationUrls class to define urls for co
 - ### Testing
 
 Testing.html file located in project's base directory can be used for viewing the results
-Apis support OpenApi description
+A .json file in repository's root directory is provided with postman requests collection, it can be imported to postman and used for testing
