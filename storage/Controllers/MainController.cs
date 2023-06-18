@@ -21,7 +21,8 @@ public class MainController: ControllerBase {
         _usersService = imagesService;
     }
 
-    [HttpPost("users/new/")]
+    [HttpPost()]
+    [Route("users/new/")]
     [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> CreateNewUser(FullUserInfoDTO dto) {
         string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
@@ -53,66 +54,11 @@ public class MainController: ControllerBase {
         return Ok(dto);
     }
 
-    //http://storage/user/images/new
-    [HttpPost()]
-    [Route("user/images/new")]
-    [Consumes("multipart/form-data")]
-    [Produces(MediaTypeNames.Text.Plain)]
-    public async Task<ActionResult> SaveImage(
-        [FromHeader] int UserId,
-        [FromHeader] string FileName,
-        [FromHeader] string FileType,
-        [FromForm] IFormFile image,
-        [FromForm] IFormFile? processed) {
-
-        ImageDataDTO dto = new ImageDataDTO() {
-            UserId = UserId,
-            FileName = FileName,
-            FileType = FileType
-        };
-
-        if (Request.Form.Files.Count() > 2 || Request.Form.Files.Count() == 0) {
-            return BadRequest(
-                "This endpoint needs 1-2 file:" + 
-                "1 for the image itself (name:image) and " +
-                "1 (optional) for the processing result (name:processed)");
-        }
-        if (Request.Form.Files.Any(file => file.Length <= 1)) {
-            return BadRequest("File length too short");
-        }
-        if (Request.Form.Files.Any(file => file.Length >= Int32.MaxValue)) {
-            return BadRequest("File length bigger than or equal to Int32.MaxValue");
-        }
-
-        User? user = await _usersService.GetUserAsync(dto.UserId);
-        if (user is null) {
-            return BadRequest("User not found");
-        }
-
-        int imageLength = (int)image.Length;
-        dto.Content = new byte[imageLength];
-        await image.OpenReadStream().ReadAsync(dto.Content);
-        
-        if (processed is not null) {
-            int processedLength = (int)processed.Length;
-            dto.Text = new byte[processedLength];
-            await processed.OpenReadStream().ReadAsync(dto.Text);
-        }
-
-        UsersServiceResult result = await _usersService
-            .SaveImageDataAsync(user, new ImageData(dto));
-
-        if (result != UsersServiceResult.Success) {
-            return BadRequest(result.ToString());
-        }
-        return NoContent();
-    }
-
-
     //http://storage/user/1/images/ + header="fileName:image.png"
     //Requires an http get request with id defined in route 
     //and header with the needed fileName
-    [HttpGet("user/{userId:int}/images/")]
+    [HttpGet()]
+    [Route("user/{userId:int}/images/")]
     [Produces(MediaTypeNames.Application.Octet)]
     public async Task<ActionResult> GetImage(
         [FromRoute] int userId,
@@ -133,7 +79,8 @@ public class MainController: ControllerBase {
     }
 
     //http://user/1/images/processed
-    [HttpGet("user/{userId:int}/images/processed")]
+    [HttpGet()]
+    [Route("user/{userId:int}/images/processed")]
     [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> GetProcessed (
         [FromRoute] int userId,
@@ -159,8 +106,63 @@ public class MainController: ControllerBase {
         }
     }
     
+//http://storage/user/images/new
+    [HttpPost()]
+    [Route("user/images/new")]
+    [Consumes("multipart/form-data")]
+    [Produces(MediaTypeNames.Text.Plain)]
+    public async Task<ActionResult> SaveImage(
+        [FromHeader] int UserId,
+        [FromHeader] string FileName,
+        [FromHeader] string FileType,
+        IFormFile image,
+        IFormFile? processed) {
+
+        ImageDataDTO dto = new ImageDataDTO() {
+            UserId = UserId,
+            FileName = FileName,
+            FileType = FileType
+        };
+
+        if (Request.Form.Files.Count() > 2 || Request.Form.Files.Count() == 0) {
+            return BadRequest(
+                "This endpoint needs 1-2 file:" + 
+                "1 for the image itself (name:image) and " +
+                "1 (optional) for the processing result (name:processed)");
+        }
+        if (Request.Form.Files.Any(file => file.Length <= 1)) {
+            return BadRequest("File length too short");
+        }
+        if (Request.Form.Files.Any(file => file.Length >= Int32.MaxValue)) {
+            return BadRequest("File length bigger than or equal to Int32.MaxValue");
+        }
+
+        User? user = await _usersService.GetUserAsync(dto.UserId);
+        if (user is null) {
+            return BadRequest("User not found");
+        }
+        int imageLength = (int)image.Length;
+        dto.Content = new byte[imageLength];
+        await image.OpenReadStream().ReadAsync(dto.Content);
+        
+        if (processed is not null) {
+            int processedLength = (int)processed.Length;
+            dto.Text = new byte[processedLength];
+            await processed.OpenReadStream().ReadAsync(dto.Text);
+        }
+
+        UsersServiceResult result = await _usersService
+            .SaveImageDataAsync(user, new ImageData(dto));
+
+        if (result != UsersServiceResult.Success) {
+            return BadRequest(result.ToString());
+        }
+        return NoContent();
+    }
+
     //http://storage/user/1
-    [HttpDelete("user/{userId:int}")]
+    [HttpDelete()]
+    [Route("user/{userId:int}")]
     [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> DeleteUser([FromRoute] int userId) {
         User? user = await _usersService.GetUserAsync(userId);

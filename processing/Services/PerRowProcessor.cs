@@ -7,8 +7,8 @@ public abstract class PerRowProcessor : Processor {
             accessor.Resize(newWidth, newHeight);
         });
         image.ProcessPixelRows(accessor => {
-            for (int y = 0; y < accessor.Height; y+=2) {
-                var pixelRow = accessor.GetRowSpan(y);
+            for (float y = 0; y < accessor.Height; y+=2.5f) {
+                var pixelRow = accessor.GetRowSpan((int)y);
                 string row = ProcessPixelRow(pixelRow);
                 writer.WriteLine(row);
             }

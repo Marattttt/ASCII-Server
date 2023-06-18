@@ -30,7 +30,7 @@ public class UploadsController : ControllerBase {
     public async Task<ActionResult> UploadImage(
         [FromRoute] int userId,
         [FromQuery] ProcessingOptions processing,
-        [FromForm] IFormFile file,
+        IFormFile file,
         [FromForm] string fileName,
         [FromForm] int processedWidth = 0,
         [FromForm] int processedHeight = 0) {

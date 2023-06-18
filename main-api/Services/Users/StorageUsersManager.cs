@@ -29,7 +29,7 @@ public class StorageUsersManager : IUsersManager {
             );
 
             HttpResponseMessage responseMessage = await client.PostAsync(
-                CommunicationUrls.StorageUrl + "user/new",
+                CommunicationUrls.StorageUrl + "users/new",
                 content
             );
             if (responseMessage.StatusCode != HttpStatusCode.NoContent) {
