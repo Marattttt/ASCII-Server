@@ -1,4 +1,5 @@
 using api.Services;
+using api.Services.Processing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<ApiImageProcessor>();
-builder.Services.AddTransient<LocalFilesManager>();
-
+builder.Services.AddScoped<AsciiImageProcessor>();
 builder.Services.AddScoped<StorageUsersManager>();
 builder.Services.AddScoped<ApiUploadsManager>();
 

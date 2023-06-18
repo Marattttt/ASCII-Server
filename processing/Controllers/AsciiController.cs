@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 
 using shared.DTOs;
@@ -7,7 +8,7 @@ using shared.Config;
 namespace processing.Controllers;
 
 [ApiController]
-[Route("[action]")]
+[Route("ascii")]
 public class AsciiController : ControllerBase
 {
     Processor _processor;
@@ -22,8 +23,8 @@ public class AsciiController : ControllerBase
     [HttpPost("convert")]
     [Consumes("image/png", "image/webp", "image/bmp", "image/pbm", "image/tga", "image/jpeg", "image/tiff")]
     public async  Task<ActionResult> Convert(
-        [FromQuery] int desiredWidth = 0,
-        [FromQuery] int desiredHeight = 0) {
+        [FromQuery] int newWidth = 0,
+        [FromQuery] int newHeight = 0) {
 
         if (Request.ContentLength is null || Request.ContentLength == 0) {
             return BadRequest("Body empty");
@@ -47,11 +48,11 @@ public class AsciiController : ControllerBase
                     _processor.Process(
                         memoryStream,
                         out result,
-                        desiredWidth, desiredHeight));
+                        newWidth, newHeight));
             memoryStream.Seek(0, SeekOrigin.Begin);
         }
-
-        await Response.BodyWriter.WriteAsync(result);
+        
+        await Response.Body.WriteAsync(result);
         return new EmptyResult();
 
     }

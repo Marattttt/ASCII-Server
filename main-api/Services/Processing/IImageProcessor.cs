@@ -1,7 +1,7 @@
 using shared.DTOs;
 
-namespace api.Services;
+namespace api.Services.Processing;
 
 public interface IImageProcessor {
-    public Task<string?> ProcessImageAsync(ImageToAsciiDTO dto); 
+    public Task ProcessImageAsync(ImageDataDTO dto, int newWidth = 0, int newHeight = 0);
 }

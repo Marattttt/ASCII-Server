@@ -29,9 +29,6 @@ namespace storage.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ImageId"));
 
-                    b.Property<string>("ASCII")
-                        .HasColumnType("text");
-
                     b.Property<byte[]>("Content")
                         .IsRequired()
                         .HasColumnType("bytea");
@@ -43,6 +40,9 @@ namespace storage.Migrations
                     b.Property<string>("FileType")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<byte[]>("Text")
+                        .HasColumnType("bytea");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -64,8 +64,7 @@ namespace storage.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserName")
                         .IsRequired()

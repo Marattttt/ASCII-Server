@@ -5,6 +5,6 @@ public class ImageDataDTO
     public string FileName { get; set; } = String.Empty;
     public string FileType { get; set; } = String.Empty;
     public string? Path { get; set; }
-    public char[]? ASCII { get; set; }
+    public byte[]? Text { get; set; }
     public byte[]? Content { get; set; }
 }

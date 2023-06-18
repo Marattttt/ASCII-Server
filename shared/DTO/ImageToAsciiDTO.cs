@@ -1,9 +1,15 @@
 ﻿namespace shared.DTOs;
 public class ImageToAsciiDTO
 {
-    public string Path { get; set; } = String.Empty;
-    public int Width { get; set; } = 0;
-    public int Height { get; set; } = 0;
-    public string? OutPath { get; set; } = null;
+    public string FileName;
+    public int NewWidth = 0;
+    public int NewHeight = 0;
+    public byte[]? Content;
+    public byte[]? ProcessingResult;
+
+    public ImageToAsciiDTO(string fileName) {
+        FileName = fileName;
+    }
+
 }
 

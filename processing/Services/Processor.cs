@@ -45,7 +45,6 @@ public abstract class Processor {
     }   
 
     protected virtual void makeAscii(StreamWriter writer, Image<Rgba32> image, int newWidth, int newHeight) {
-        Console.WriteLine(newWidth.ToString() + ' ' + newHeight.ToString());
         image.Mutate(accessor => {
             accessor.Resize(newWidth, newHeight);
         });
@@ -57,7 +56,7 @@ public abstract class Processor {
             }
         });
     }
-
+    
     protected string ProcessPixelRow(Span<Rgba32> pixelRow) {
         // pixelRow.Length has the same value as accessor.Width,
         // but using pixelRow.Length allows the JIT to optimize away bounds checks

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,22 +51,33 @@ public class MainController: ControllerBase {
         return Ok(dto);
     }
 
-    //
     //http://storage/user/images/new
     [HttpPost("user/images/new")]
-    [Consumes("application/octet-stream")]
     public async Task<ActionResult> SaveImage(
         [FromHeader] int UserId,
         [FromHeader] string FileName,
         [FromHeader] string FileType,
-        [FromHeader] int Length) {
+        [FromForm] IFormFile image,
+        [FromForm] IFormFile? processed) {
+            Console.WriteLine("SaveProcessedImage invoked");
+
         ImageDataDTO dto = new ImageDataDTO() {
             UserId = UserId,
             FileName = FileName,
             FileType = FileType
         };
-        if (Length == 0) {
-            return BadRequest("Length header = 0");
+
+        if (Request.Form.Files.Count() > 2 || Request.Form.Files.Count() == 0) {
+            return BadRequest(
+                "This endpoint needs 1-2 file:" + 
+                "1 for the image itself (name:image) and " +
+                "1 (optional) for the processing result (name:processed)");
+        }
+        if (Request.Form.Files.Any(file => file.Length <= 1)) {
+            return BadRequest("File length too short");
+        }
+        if (Request.Form.Files.Any(file => file.Length >= Int32.MaxValue)) {
+            return BadRequest("File length bigger than or equal to Int32.MaxValue");
         }
 
         User? user = await _usersService.GetUserAsync(dto.UserId);
@@ -73,11 +85,25 @@ public class MainController: ControllerBase {
             return BadRequest("User not found");
         }
 
-        dto.Content = new byte[Length];
+        int imageLength = (int)image.Length;
+        dto.Content = new byte[imageLength];
+        await image.OpenReadStream().ReadAsync(dto.Content);
+        
+        if (processed is not null) {
+            int processedLength = (int)processed.Length;
+            dto.Text = new byte[processedLength];
+            await processed.OpenReadStream().ReadAsync(dto.Text);
+        }
 
-        await Request.Body.ReadAsync(dto.Content, 0, Length);
+        using (var ms = new MemoryStream(dto.Text!)) {
+            var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
+            string? test = reader.ReadLine();
+            Console.WriteLine(test);
+        }
 
-        UsersServiceResult result = await _usersService.SaveImageDataAsync(user, new ImageData(dto));
+        UsersServiceResult result = await _usersService
+            .SaveImageDataAsync(user, new ImageData(dto));
+
         if (result != UsersServiceResult.Success) {
             return BadRequest(result.ToString());
         }
@@ -89,11 +115,11 @@ public class MainController: ControllerBase {
     //and header with the needed fileName
     //http://storage/user/1/images/ + header="fileName:image.png"
     [HttpGet("user/{userId:int}/images/")]
-    [Consumes("text/plain")]
     public async Task<ActionResult> GetImage(
         [FromRoute] int userId,
         [FromHeader] string fileName) {
             
+        Console.WriteLine(fileName);
         User? user = await _usersService.GetUserAsync(userId);
         if (user is null) {
             return BadRequest("User not found");
@@ -106,6 +132,34 @@ public class MainController: ControllerBase {
 
         return File(result.imageData.Content, MediaTypeNames.Application.Octet);
     }
+
+    [HttpGet("user/{userId:int}/images/processed")]
+    public async Task<ActionResult> GetProcessed (
+        [FromRoute] int userId,
+        [FromHeader] string fileName) {
+
+        User? user = await _usersService.GetUserAsync(userId);
+        if (user is null) {
+            return BadRequest("User not found");
+        }
+
+        var result = _usersService.GetImageData(user, fileName);
+        if (result.imageData is null) {
+            return BadRequest(result.result.ToString());
+        }
+        if (result.imageData.Text is null ||
+            result.imageData.Text.Count() == 0) {
+            return BadRequest("No saved text");
+        }
+        using (var ms = new MemoryStream(result.imageData.Text)) {
+            var reader = new StreamReader(ms, new UTF8Encoding(true));
+            Response.ContentType = MediaTypeNames.Text.Plain;
+            return Ok(await reader.ReadToEndAsync());
+        }
+
+        // return File(result.imageData.Text, MediaTypeNames.Text.Plain);
+    }
+    
     
     [HttpDelete("user/{userId:int}")]
     public async Task<ActionResult> DeleteUser([FromRoute] int userId) {

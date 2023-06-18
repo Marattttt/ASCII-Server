@@ -8,7 +8,7 @@ public class ImageData {
     public string FileName { get; set; } = String.Empty;    
     public string FileType { get; set; } = String.Empty;
     public required byte[] Content { get; set; }
-    public char[] ASCII { get; set; } = new char[0];
+    public byte[]? Text { get; set; }
     public int UserId { get; set; }
     public User? Owner { get; set; }
 
@@ -23,7 +23,7 @@ public class ImageData {
         UserId = dto.UserId;
         FileName = dto.FileName;
         FileType = dto.FileType;
-        ASCII = dto.ASCII ?? new char[0];
+        Text = dto.Text;
         Content = dto.Content;
     }
     public ImageDataDTO ToDTO() {
@@ -31,7 +31,7 @@ public class ImageData {
                     UserId = this.UserId,
                     FileName = this.FileName,
                     FileType = this.FileType,
-                    ASCII = this.ASCII,
+                    Text = this.Text,
                     Content = this.Content
                 };
     }
@@ -39,6 +39,6 @@ public class ImageData {
         FileName = newData.FileName;
         FileType = newData.FileType;
         Content = newData.Content;
-        ASCII = newData.ASCII;
+        Text = newData.Text;
     }
 }

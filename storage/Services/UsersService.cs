@@ -41,6 +41,7 @@ public class UsersService {
     }
 
     public async Task<UsersServiceResult> SaveImageDataAsync (User user, ImageData img) {
+        
         using (var memStream = new MemoryStream(img.Content)) {
             bool isRecognizableType = FileTypeValidator.IsImage(memStream);
             if (!isRecognizableType) {

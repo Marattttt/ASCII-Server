@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 
 using shared.DTOs;
 using shared.Config;
@@ -11,33 +12,67 @@ public class ApiUploadsManager : IUploadsManager {
             throw new ArgumentNullException("DTO content is null");
         }
         using (HttpClient client = new HttpClient()) {
-            HttpContent content = new StreamContent(
-                new MemoryStream(dto.Content)
-            );
+            MultipartFormDataContent content = new MultipartFormDataContent();
+
             content.Headers.Add(nameof(dto.UserId), dto.UserId.ToString());
             content.Headers.Add(nameof(dto.FileName), dto.FileName);
             content.Headers.Add(nameof(dto.FileType), dto.FileType);
-            content.Headers.Add("Length", dto.Content.Length.ToString());
+
+            // var imageContentStream = new MemoryStream(dto.Content);
+            var imageContent = new ByteArrayContent(dto.Content);
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            content.Add(
+                imageContent, "image", "image"
+            );
+
+            if (dto.Text?.Count() > 0) {
+                var processedContent = new ByteArrayContent(dto.Text);
+                processedContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                content.Add(
+                    processedContent, "processed", "processed"
+                );
+            }
             
             HttpResponseMessage responseMessage = await client.PostAsync(
                 CommunicationUrls.StorageUrl + "user/images/new",
                 content
             );
 
-            if (responseMessage.StatusCode == HttpStatusCode.NoContent) {
-                return null;
+            if (!responseMessage.IsSuccessStatusCode) {
+                return await responseMessage.Content.ReadAsStringAsync();
             }
 
-            return await responseMessage.Content.ReadAsStringAsync();
+            return null;
         }
     }
     public async Task<(Stream? stream, string? errorMessage)> GetImageAsync(
         int userId, 
         string fileName) {
+
         using (var client = new HttpClient()) {
             
             client.DefaultRequestHeaders.Add("fileName", fileName);
             string endPoint = $"user/{userId}/images";
+
+            var response = await client.GetAsync(
+                CommunicationUrls.StorageUrl + endPoint);
+
+            if (!response.IsSuccessStatusCode) {
+                return (null, await response.Content.ReadAsStringAsync());
+            }
+
+            var ms = await response.Content.ReadAsStreamAsync();
+            return (ms, null);
+        }
+    }
+
+    public async Task<(Stream? stream, string? errorMessage)> GetProcessedImageAsync (
+        int userId, 
+        string fileName){
+        
+        using (var client = new HttpClient()) {
+            client.DefaultRequestHeaders.Add("fileName", fileName);
+            string endPoint = $"user/{userId}/images/processed";
 
             var response = await client.GetAsync(
                 CommunicationUrls.StorageUrl + endPoint);
