@@ -1,7 +1,7 @@
 using System.Text;
 namespace processing.Services;
 
-public class AsciiProcessor : Processor {
+public class AsciiProcessor : PerRowProcessor {
     const string asciiRow = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~i!lI;:,\"^`\". ";
     protected override void writeChar(Rgba32 input, StringBuilder sb) {        
         float lightness = (input.R + input.G + input.B);

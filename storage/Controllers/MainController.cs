@@ -15,16 +15,15 @@ namespace storage.Controllers;
 [Route("")] //https://storage/
 public class MainController: ControllerBase {
 
-    //up to 500 chars with the utf 8 max single char size of 4 bytes in mind
-    const int MaxBufferSize = 500 * 4; 
     UsersService _usersService;
 
     public MainController(UsersService imagesService) {
         _usersService = imagesService;
     }
 
-    [HttpPost("user/new/")]
-    public async Task<ActionResult<User>> CreateNewUser(FullUserInfoDTO dto) {
+    [HttpPost("users/new/")]
+    [Produces(MediaTypeNames.Text.Plain)]
+    public async Task<ActionResult> CreateNewUser(FullUserInfoDTO dto) {
         string dtoErrorMessage = UserDataChecker.CheckFullUserDto(dto);
         if (dtoErrorMessage != String.Empty) {
             return BadRequest(dtoErrorMessage);
@@ -41,7 +40,10 @@ public class MainController: ControllerBase {
         return NoContent();
     }
 
-    [HttpGet("user/{id:int}")] //http://storage/user/123
+    //http://storage/user/123
+    [HttpGet()]
+    [Route("user/{id:int}")] 
+    [Produces(MediaTypeNames.Application.Json)]
     public async Task<ActionResult<FullUserInfoDTO?>> GetUserById(int id) {
         User? user = await _usersService.GetUserAsync(id);
         if (user is null) {
@@ -52,19 +54,21 @@ public class MainController: ControllerBase {
     }
 
     //http://storage/user/images/new
-    [HttpPost("user/images/new")]
+    [HttpPost()]
+    [Route("user/images/new")]
+    [Consumes("multipart/form-data")]
+    [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> SaveImage(
-        [FromHeader] int UserId,
-        [FromHeader] string FileName,
-        [FromHeader] string FileType,
+        [FromForm] int userId,
+        [FromForm] string fileName,
+        [FromForm] string fileType,
         [FromForm] IFormFile image,
         [FromForm] IFormFile? processed) {
-            Console.WriteLine("SaveProcessedImage invoked");
 
         ImageDataDTO dto = new ImageDataDTO() {
-            UserId = UserId,
-            FileName = FileName,
-            FileType = FileType
+            UserId = userId,
+            FileName = fileName,
+            FileType = fileType
         };
 
         if (Request.Form.Files.Count() > 2 || Request.Form.Files.Count() == 0) {
@@ -111,10 +115,11 @@ public class MainController: ControllerBase {
     }
 
 
+    //http://storage/user/1/images/ + header="fileName:image.png"
     //Requires an http get request with id defined in route 
     //and header with the needed fileName
-    //http://storage/user/1/images/ + header="fileName:image.png"
     [HttpGet("user/{userId:int}/images/")]
+    [Produces(MediaTypeNames.Application.Octet)]
     public async Task<ActionResult> GetImage(
         [FromRoute] int userId,
         [FromHeader] string fileName) {
@@ -133,7 +138,9 @@ public class MainController: ControllerBase {
         return File(result.imageData.Content, MediaTypeNames.Application.Octet);
     }
 
+    //http://user/1/images/processed
     [HttpGet("user/{userId:int}/images/processed")]
+    [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> GetProcessed (
         [FromRoute] int userId,
         [FromHeader] string fileName) {
@@ -156,12 +163,11 @@ public class MainController: ControllerBase {
             Response.ContentType = MediaTypeNames.Text.Plain;
             return Ok(await reader.ReadToEndAsync());
         }
-
-        // return File(result.imageData.Text, MediaTypeNames.Text.Plain);
     }
     
-    
+    //http://storage/user/1
     [HttpDelete("user/{userId:int}")]
+    [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> DeleteUser([FromRoute] int userId) {
         User? user = await _usersService.GetUserAsync(userId);
         if (user is null) {
@@ -171,7 +177,9 @@ public class MainController: ControllerBase {
         return NoContent();
     }
 
+    //http://storage/user/1/images
     [HttpDelete("user/{userId:int}/images/")]
+    [Produces(MediaTypeNames.Text.Plain)]
     public async Task<ActionResult> DeleteImage(
         [FromRoute] int userId,
         [FromHeader] string fileName) {

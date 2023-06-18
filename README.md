@@ -1,32 +1,40 @@
 # ASCII-Server
 
-The project's goal is to develop a web application for accepting images, processing them into their ASCII represention, optionally saving it, and giving the text back to user
+The project's goal is to develop a web application for accepting images, processing them into their text (only ascii supported right now) represention and saving it with the image and user data
 
 Status: *Under development*
 
 ## Using
 
-Note: main api uses static CommunicationUrls class to define urls for communication. When changing listening ports of microservices or adding new ones, this is the class to add changes to. Its set up is described later in this part
+Main api uses static Shared/Config/CommunicationUrls class to define urls for communication. When changing listening ports of microservices or adding new ones, this is the class to add changes to. Its set up is described later in this file
 
 - ### Defaults
 
 1. Main api uses ports 5000 for http and 7000 for https
 2. Processing api uses port 5001 for http
-3. Maximum allowed image size is 5 megabytes
+3. Storage api uses port 5002 for http
+4. Maximum allowed image size is 100 megabytes
+
+- ### shared
+
+1. Rename ConfigExample folder to Config
+2. Change all extensions in ConfigExample/ to .cs
+3. SupportedTypes class lists types supportded by ImageSharp library used for processing image data as of version 3.0.1
 
 - ### main-api
 
-1. Rename ConfigExample folder to Config
-2. Change Config/FileConfig.txt extension to .cs
-3. Edit Config/FileConfig.cs to match your settings
-4. Change Config/CommunicationUrls.txt to .cs and make sure it is up to date with other microservices
-5. Edit MaxFileSizeBytes constant in ImagesService.cs to match your needs
-6. (optionally) configure listening ports in appsettings.json
+1. (optionally) configure listening ports in appsettings.json
 
 - ### processing
+
+1. (optionally) configure listening port in appsettings.json
+2. When defining new processors, inherit from PerRowProcessor to process every second row of an image (for monospace fonts with 1/2 aspect ratio) or from Processor for a different implementation  
+
+- ### storage
 
 1. (optionally) configure listening port in appsettings.json
 
 - ### Testing
 
-Testing.html file located in project's base directory can be used for testing and viewing the results
+Testing.html file located in project's base directory can be used for viewing the results
+Apis support OpenApi description

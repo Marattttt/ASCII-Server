@@ -1,8 +1,5 @@
-using System;
 using FileTypeChecker;
 using FileTypeChecker.Abstracts;
-
-using System.Linq;
 
 using shared.DTOs;
 using storage.Data;

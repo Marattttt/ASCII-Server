@@ -62,14 +62,6 @@ public class UploadsController : ControllerBase {
             } catch (HttpRequestException e) {
                 return BadRequest(e.Message);
             }
-            // using (var ms = new MemoryStream(dto.Text!)) {
-            //     byte[] buff = new byte[100];
-            //     await ms.ReadAsync(buff);
-            //     Console.WriteLine(
-            //         System.Text.Encoding.UTF8.GetString(buff)
-            //     );
-                
-            // }
         }
 
         string? uploadErrorMessage = await _uploadsManager.UploadImageAsync(dto);
@@ -137,10 +129,6 @@ public class UploadsController : ControllerBase {
         if (existingUser is null) {
             return BadRequest("User not found");
         }
-
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(existingUser));
-
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(dto));
 
         if (existingUser.Password != dto.Password || existingUser.UserName != dto.UserName) {
             return Unauthorized();
