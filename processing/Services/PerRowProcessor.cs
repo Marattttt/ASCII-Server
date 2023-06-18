@@ -2,7 +2,7 @@ using System.Text;
 namespace processing.Services;
 
 public abstract class PerRowProcessor : Processor {
-    protected override void makeAscii(StreamWriter writer, Image<Rgba32> image, int newWidth, int newHeight) {
+    protected override void makeText(StreamWriter writer, Image<Rgba32> image, int newWidth, int newHeight) {
         image.Mutate(accessor => {
             accessor.Resize(newWidth, newHeight);
         });

@@ -33,13 +33,13 @@ public abstract class Processor {
                 newHeight = image.Height;
             }
             
-            makeAscii(writer, image, newWidth, newHeight);
+            makeText(writer, image, newWidth, newHeight);
             writer.Flush();
             destination = ms.ToArray();
         }
         return Task.CompletedTask;
     }   
-    protected abstract void makeAscii(
+    protected abstract void makeText(
         StreamWriter writer, 
         Image<Rgba32> image, 
         int newWidth, int newHeight);
