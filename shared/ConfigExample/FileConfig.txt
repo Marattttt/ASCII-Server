@@ -1,4 +1,4 @@
-namespace api.Configuration;
+namespace api.Config;
 
 public static class FileConfig
 {
