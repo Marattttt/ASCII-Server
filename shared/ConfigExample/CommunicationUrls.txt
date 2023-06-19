@@ -1,4 +1,4 @@
-namespace api.Config;
+namespace shared.Config;
 
 public static class CommunicationUrls
 {
